@@ -158,9 +158,6 @@ class MenuView: UIView {
             toolbarButton.target = self
             toolbarButton.action = "toolbarButtonSelected:"
             toolbarItems.append(toolbarButton)
-            if index < numberOfToolbarItems-1 {
-                toolbarItems.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil))
-            }
         }
     }
 
@@ -201,14 +198,18 @@ class MenuView: UIView {
     }
 
     private func layoutToolbar() {
-        toolbar.setItems(toolbarItems, animated: false)
+        var displayToolbarItems = [UIBarButtonItem]()
+        for (index, item) in toolbarItems.enumerate() {
+            displayToolbarItems.append(item)
+            if index < toolbarItems.count-1 {
+                displayToolbarItems.append(UIBarButtonItem(barButtonSystemItem: UIBarButtonSystemItem.FlexibleSpace, target: nil, action: nil))
+            }
+        }
+        toolbar.setItems(displayToolbarItems, animated: false)
     }
 
 
     private func layoutMenu() {
-
-
-
         // if there is only 1 page in our menu, disable scrolling
         if menuItemDataSource?.numberOfPagesInMenuView(self) ?? 0 > 1 {
             menuPageController.getScrollView()?.scrollEnabled = true
@@ -253,7 +254,7 @@ class MenuView: UIView {
 
     }
 
-    private func toolbarButtonSelected(sender: UIBarButtonItem) {
+    @objc private func toolbarButtonSelected(sender: UIBarButtonItem) {
         guard let selectedButtonIndex = toolbarItems.indexOf(sender) else { return }
         toolbarDelegate?.menuView(self, didSelectItemAtIndex: selectedButtonIndex)
     }

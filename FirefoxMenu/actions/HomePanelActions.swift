@@ -16,6 +16,7 @@ struct ViewTopSitesAction: HomePanelAction {
     init() { }
 
     func performActionWithBrowserViewController(bvc: BrowserViewController) {
+        print("Action: ViewTopSitesAction")
         bvc.openHomePanels()
         bvc.openTopSitesPanel()
     }
@@ -25,6 +26,7 @@ struct ViewBookmarksAction: HomePanelAction {
     init() { }
 
     func performActionWithBrowserViewController(bvc: BrowserViewController) {
+        print("Action: ViewBookmarksAction")
         bvc.openHomePanels()
         bvc.openBookmarksPanel()
     }
@@ -34,6 +36,7 @@ struct ViewHistoryAction: HomePanelAction {
     init() { }
 
     func performActionWithBrowserViewController(bvc: BrowserViewController) {
+        print("Action: ViewHistoryAction")
         bvc.openHomePanels()
         bvc.openHistoryPanel()
     }
@@ -43,6 +46,7 @@ struct ViewReadingListAction: HomePanelAction {
     init() { }
 
     func performActionWithBrowserViewController(bvc: BrowserViewController) {
+        print("Action: ViewReadingListAction")
         bvc.openHomePanels()
         bvc.openReadingListPanel()
     }
