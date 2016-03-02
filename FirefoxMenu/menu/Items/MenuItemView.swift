@@ -8,46 +8,83 @@
 
 import UIKit
 
-class MenuItemView: UIButton {
+public class MenuItemView: UIControl {
 
-    lazy var menuItemImageView: UIImageView = {
-        let view = UIImageView()
-        return view
-    }()
+    private(set) public var imageView: UIImageView
+    private(set) public var titleLabel: UILabel
 
-    lazy var menuItemTitleLabel: UILabel = {
-        let view = UILabel()
-        view.lineBreakMode = NSLineBreakMode.ByWordWrapping
-        view.numberOfLines = 2
-        return view
-    }()
+    private var previousLocation: CGPoint?
 
+    public init() {
+        imageView = UIImageView()
+        titleLabel = UILabel()
 
-    init() {
         super.init(frame: CGRectZero)
 
-        self.addSubview(menuItemImageView)
-        menuItemImageView.topAnchor.constraintEqualToAnchor(self.topAnchor)
-        menuItemImageView.leftAnchor.constraintEqualToAnchor(self.leftAnchor)
-        menuItemImageView.rightAnchor.constraintEqualToAnchor(self.rightAnchor)
-        menuItemImageView.heightAnchor.constraintEqualToConstant(30)
-        
-        self.addSubview(menuItemTitleLabel)
-        menuItemTitleLabel.topAnchor.constraintEqualToAnchor(self.menuItemImageView.bottomAnchor)
-        menuItemTitleLabel.leftAnchor.constraintEqualToAnchor(self.leftAnchor)
-        menuItemTitleLabel.rightAnchor.constraintEqualToAnchor(self.rightAnchor)
-        menuItemTitleLabel.bottomAnchor.constraintEqualToAnchor(self.bottomAnchor)
+        self.translatesAutoresizingMaskIntoConstraints = false
+
+        titleLabel.lineBreakMode = NSLineBreakMode.ByWordWrapping
+        titleLabel.numberOfLines = 2
+        titleLabel.textAlignment = NSTextAlignment.Center
+
+        self.addSubview(imageView)
+
+        self.addSubview(titleLabel)
     }
 
-    override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
-        if let imageHeight = menuItemImageView.image?.size.height {
-            menuItemImageView.heightAnchor.constraintEqualToConstant(imageHeight)
-        }
+        let imageHeight = self.bounds.height * 0.5
+        let x = (self.bounds.width - (imageView.image?.size.width ?? 0)) / 2
+        let y = (imageHeight - (imageView.image?.size.width ?? 0)) / 2
+        imageView.frame = CGRectMake(x, y, imageView.image?.size.width ?? self.bounds.width, imageView.image?.size.height ?? imageHeight)
+        titleLabel.frame = CGRectMake(0, imageHeight, self.bounds.width, self.bounds.height - (imageHeight + 5))
     }
 
-    required init?(coder aDecoder: NSCoder) {
+    required public init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
 
+    func prepareForReuse() {
+        imageView.image = nil
+        titleLabel.text = nil
+    }
+
+    public func setTitle(title: String) {
+        titleLabel.text = title
+    }
+
+    public func setImage(image: UIImage) {
+        imageView.image = image
+    }
+
+    public func setHighlightedImage(image: UIImage) {
+        imageView.highlightedImage = image
+    }
+
+    public override func beginTrackingWithTouch(touch: UITouch, withEvent event: UIEvent?) -> Bool {
+        super.beginTrackingWithTouch(touch, withEvent: event)
+        // work out whether or not the touch happened inside this item
+        // return true if so, false otherwise
+        if !self.bounds.contains(touch.locationInView(self)) {
+            return false
+        }
+
+        imageView.highlighted = true
+        return true
+    }
+
+    public override func continueTrackingWithTouch(touch: UITouch, withEvent event: UIEvent?) -> Bool {
+        super.continueTrackingWithTouch(touch, withEvent: event)
+        if !self.bounds.contains(touch.locationInView(self)) {
+            imageView.highlighted = false
+            return false
+        }
+        return true
+    }
+
+    public override func endTrackingWithTouch(touch: UITouch?, withEvent event: UIEvent?) {
+        super.endTrackingWithTouch(touch, withEvent: event)
+        imageView.highlighted = false
+    }
 }

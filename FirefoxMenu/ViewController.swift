@@ -22,23 +22,9 @@ class ViewController: UIViewController {
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if let menuVC = segue.destinationViewController as? MenuViewController {
-            menuVC.itemDelegate = self
-            menuVC.toolbarItemDelegate = self
-            menuVC.menuLocation = .TabsTray
+            menuVC.setMenuItems(MenuConfiguration.menuItems, toolbarItems: MenuConfiguration.menuToolbarItems, forLocation: .TabsTray)
+            
         }
-    }
-}
-
-extension ViewController: MenuItemDelegate {
-    func menuItemWasPressed(menuItem: MenuItem) {
-        print("Menu item \(menuItem.title) was pressed")
-    }
-}
-
-extension ViewController: MenuToolbarItemDelegate {
-    func menuToolbarItemWasPressed(menuToolbarItem: MenuToolbarItem) {
-        print("Menu toolbar item \(menuToolbarItem.title) was pressed")
-
     }
 }
 

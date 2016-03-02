@@ -11,82 +11,138 @@ import UIKit
 class MenuViewController: UIViewController {
 
     var menuLocation: DisplayLocation = .Browser
-    var itemDelegate: MenuItemDelegate? = nil, toolbarItemDelegate: MenuToolbarItemDelegate? = nil
+    var menuLocationURL: NSURL?
 
-    lazy private var menuToolbarItems: [MenuToolbarItem] = {
-        var toolbarItems = [MenuToolbarItem]()
+    private var menuView: MenuView!
 
-        for toolbarItem in MenuConfiguration.menuToolbarItems {
-            toolbarItems.append(toolbarItem.type.init(config: toolbarItem, delegate: self.toolbarItemDelegate))
+    private var menuToolbarItems: [MenuToolbarItem]!
+
+    private var menuItems: [MenuItemState]!
+
+    func setMenuItems(items: [MenuItem], toolbarItems: [MenuToolbarItem], forLocation location: DisplayLocation, url: NSURL? = nil) {
+        self.menuLocation = location
+        self.menuToolbarItems = toolbarItems.filter { $0.enabled }
+        let validMenuItemsForLocation = items.filter { $0.displayLocations.contains(location) }
+        self.menuItems = validMenuItemsForLocation.flatMap { menuItem in
+            return menuItem.states.filter { $0.isVisible(url) }
         }
-
-        return toolbarItems
-    }()
-
-    lazy private var menuItems: [MenuItem] = {
-        var menuItems = [MenuItem]()
-
-        for menuItem in MenuConfiguration.menuItems {
-            menuItems.append(menuItem.type.init(config: menuItem, delegate: self.itemDelegate))
-        }
-        return menuItems
-    }()
-
-    lazy var toolbarStackView: UIStackView = {
-        let toolbarButtons = self.menuToolbarItems.flatMap{ return $0.menuToolbarItem() }
-        let stackView = UIStackView(arrangedSubviews: toolbarButtons)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .Horizontal
-        stackView.distribution = .FillProportionally
-        stackView.alignment = .LastBaseline
-        stackView.spacing = 10
-
-        return stackView
-    }()
-
-    lazy var menuItemsStackView: UIStackView = {
-        let menuButtons = self.menuItems.flatMap{ return $0.menuItemForLocation(self.menuLocation) }
-
-        let stackView = UIStackView(arrangedSubviews: menuButtons)
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .Horizontal
-        stackView.distribution = .FillEqually
-        stackView.alignment = .Fill
-        stackView.spacing = 5
-        return stackView
-    }()
-
-    lazy var menuStackView: UIStackView = {
-        let toolbar = self.toolbarStackView
-        let menu = self.menuItemsStackView
-        let stackView = UIStackView(arrangedSubviews: [toolbar, menu])
-        stackView.translatesAutoresizingMaskIntoConstraints = false
-        stackView.axis = .Vertical
-        stackView.distribution = .FillProportionally
-        stackView.alignment = .LastBaseline
-        stackView.spacing = 5
-
-        stackView.backgroundColor = MenuConfiguration.menuBackgroundColor
-
-        return stackView
-    }()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
 
+
+        menuView = MenuView()
+        menuView.menuItemDelegate = self
+        menuView.menuItemDataSource = self
+        menuView.toolbarDelegate = self
+        menuView.toolbarDataSource = self
+
         // Do any additional setup after loading the view.
         view.backgroundColor = UIColor.yellowColor()
-        view.addSubview(menuStackView)
 
-        menuStackView.leadingAnchor.constraintEqualToAnchor(view.leadingAnchor).active = true
-        menuStackView.trailingAnchor.constraintEqualToAnchor(view.trailingAnchor).active = true
-        menuStackView.topAnchor.constraintEqualToAnchor(view.topAnchor).active = true
-        menuStackView.bottomAnchor.constraintEqualToAnchor(view.bottomAnchor).active = true
+        view.addSubview(menuView)
+        menuView.topAnchor.constraintEqualToAnchor(view.topAnchor).active = true
+        menuView.rightAnchor.constraintEqualToAnchor(view.rightAnchor).active = true
+        menuView.bottomAnchor.constraintEqualToAnchor(view.bottomAnchor).active = true
+        menuView.leftAnchor.constraintEqualToAnchor(view.leftAnchor).active = true
     }
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        // Dispose of any resources that can be recreated
     }
 
+    func performAction(action: Action) {
+        switch action {
+        case is TabAction:
+            (action as! TabAction).performActionWithTabManager(TabManager())
+            break
+        case is BookmarkAction:
+            (action as! BookmarkAction).performActionWithProfile(Profile())
+            break
+        case is BrowserAction:
+            (action as! BrowserAction).performActionWithBrowserViewController(BrowserViewController())
+            break
+        case is HomePanelAction:
+            (action as! HomePanelAction).performActionWithBrowserViewController(BrowserViewController())
+            break
+        case is SettingsAction:
+            (action as! SettingsAction).performActionWithRootViewController(self)
+            break
+        default:
+            print("Unexpected action type")
+            break
+        }
+    }
+
+}
+
+extension MenuViewController: MenuItemDelegate {
+    func menuView(menu: MenuView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        let item = menuItems[indexPath.getMenuItemIndex()]
+        let action = item.action.init()
+        performAction(action)
+    }
+}
+
+extension MenuViewController: MenuItemDataSource {
+    func numberOfPagesInMenuView(menuView: MenuView) -> Int {
+        return Int(ceil(Double(self.menuItems.count) / Double(MenuConfiguration.MaxNumberOfItemsInMenuPage)))
+    }
+
+    func numberOfItemsPerRowInMenuView(menuView: MenuView) -> Int {
+        return 3
+    }
+
+    func menuView(menuView: MenuView, numberOfItemsForPage page: Int) -> Int {
+        let pageStartIndex = page * MenuConfiguration.MaxNumberOfItemsInMenuPage
+        if (pageStartIndex + MenuConfiguration.MaxNumberOfItemsInMenuPage) > menuItems.count {
+            return menuItems.count - pageStartIndex
+        }
+        return MenuConfiguration.MaxNumberOfItemsInMenuPage
+    }
+
+    func menuView(menuView: MenuView, viewForItemAtIndexPath indexPath: NSIndexPath) -> MenuItemView {
+        let menuItemView = menuView.dequeueReusableMenuItemViewForIndexPath(indexPath)
+        let menuItem = menuItems[indexPath.getMenuItemIndex()]
+
+        menuItemView.setTitle(menuItem.title)
+        menuItemView.titleLabel.font = MenuConfiguration.MenuFont
+        menuItemView.titleLabel.textColor = MenuConfiguration.MenuFontColor
+        if let icon = menuItem.icon {
+            menuItemView.setImage(icon)
+        }
+        if let selectedIcon = menuItem.selectedIcon {
+            menuItemView.setHighlightedImage(selectedIcon)
+        }
+
+        return menuItemView
+    }
+}
+
+extension MenuViewController: MenuToolbarDataSource {
+    func numberOfToolbarItemsInMenuView(menuView: MenuView) -> Int {
+        return menuToolbarItems.count
+    }
+
+    func menuView(menuView: MenuView, buttonForItemAtIndex index: Int) -> UIBarButtonItem {
+        let item = menuToolbarItems[index]
+        let toolbarItemView = UIBarButtonItem(image: item.icon, style: UIBarButtonItemStyle.Plain, target: nil, action: nil)
+        return toolbarItemView
+    }
+}
+
+extension MenuViewController: MenuToolbarItemDelegate {
+    func menuView(menuView: MenuView, didSelectItemAtIndex index: Int) {
+        let item = menuToolbarItems[index]
+        let action = item.action.init()
+        performAction(action)
+    }
+}
+
+extension NSIndexPath {
+    func getMenuItemIndex() -> Int {
+        return (section * MenuConfiguration.MaxNumberOfItemsInMenuPage) + row
+    }
 }

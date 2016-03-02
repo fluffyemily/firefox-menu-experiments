@@ -9,46 +9,28 @@
 import Foundation
 import UIKit
 
-protocol MenuToolbarItem {
+struct MenuToolbarItem {
 
-    var title: String { get }
-    var icon: UIImage { get }
-    var selectedIcon: UIImage { get }
-    var config: MenuToolbarItemConfig { get set }
-    var delegate: MenuToolbarItemDelegate? { get set }
+    private let iconName: String
+    private let selectedIconName: String
 
-    init(config: MenuToolbarItemConfig, delegate: MenuToolbarItemDelegate?)
-
-    func menuToolbarItem() -> UIView?
-
-}
-
-extension MenuToolbarItem {
-
-    var icon: UIImage {
-        return UIImage(named: self.config.icon)!
-    }
-
-    var selectedIcon: UIImage {
-        return UIImage(named: self.config.selectedIcon)!
-    }
-}
-
-protocol MenuToolbarItemDelegate {
-    func menuToolbarItemWasPressed(menuToolbarItem: MenuToolbarItem)
-}
-
-struct MenuToolbarItemConfig {
-
-    let type: MenuToolbarItem.Type
+    let action: Action.Type
+    let title: String
     let enabled: Bool
-    let icon: String
-    let selectedIcon: String
 
-    init(type: MenuToolbarItem.Type, enabled: Bool, icon: String, selectedIcon: String) {
-        self.type = type
+    var icon: UIImage? {
+        return UIImage(named: iconName)
+    }
+
+    var selectedIcon: UIImage? {
+        return UIImage(named: selectedIconName)
+    }
+
+    init(title: String, enabled: Bool, icon: String, selectedIcon: String, action: Action.Type) {
+        self.action = action
+        self.title = title
         self.enabled = enabled
-        self.icon = icon
-        self.selectedIcon = selectedIcon
+        self.iconName = icon
+        self.selectedIconName = selectedIcon
     }
 }
