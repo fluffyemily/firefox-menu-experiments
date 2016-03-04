@@ -30,7 +30,7 @@ class MenuItemViewController: UIViewController {
         super.viewDidLoad()
     }
 
-    let colours = [UIColor.cyanColor(), UIColor.brownColor(), UIColor.greenColor(), UIColor.purpleColor(), UIColor.redColor()]
+    let colours = [UIColor.cyanColor(), UIColor.brownColor(), UIColor.greenColor(), UIColor.purpleColor(), UIColor.redColor(), UIColor.yellowColor()]
 
     private func layoutPage() {
         var x = itemPadding

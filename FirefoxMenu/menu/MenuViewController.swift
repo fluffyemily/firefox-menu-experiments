@@ -14,7 +14,7 @@ class MenuViewController: UIViewController {
         didSet {
             guard let state = state else { return }
             switch state {
-            case .BrowserState(_, _, _):
+            case .BrowserState(_, _, _, _):
                 location = .Browser
             case .TabsTrayState:
                 location = .TabsTray

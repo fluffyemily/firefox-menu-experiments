@@ -9,7 +9,7 @@
 import UIKit
 
 enum AppState {
-    case BrowserState(url: NSURL, isBookmarked: Bool, isDesktopSite: Bool)
+    case BrowserState(url: NSURL, isBookmarked: Bool, isDesktopSite: Bool, hasAccount: Bool)
     case TabsTrayState
     case HomePanelState(homePanelIndex: Int)
 }
@@ -28,7 +28,7 @@ class ViewController: UIViewController {
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if let menuVC = segue.destinationViewController as? MenuViewController {
-            menuVC.setMenuItems(MenuConfiguration.menuItems, toolbarItems: MenuConfiguration.menuToolbarItems, forState: .TabsTrayState)
+            menuVC.setMenuItems(MenuConfiguration.menuItems, toolbarItems: MenuConfiguration.menuToolbarItems, forState: .BrowserState(url: NSURL(string: "http://google.co.uk")!, isBookmarked: false, isDesktopSite: false, hasAccount: true))
             menuVC.actionDelegate = self
         }
     }
