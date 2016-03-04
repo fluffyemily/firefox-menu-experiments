@@ -10,22 +10,43 @@ import UIKit
 
 class MenuViewController: UIViewController {
 
-    var menuLocation: DisplayLocation = .Browser
-    var menuLocationURL: NSURL?
+    var state: AppState? {
+        didSet {
+            guard let state = state else { return }
+            switch state {
+            case .BrowserState(_, _, _):
+                location = .Browser
+            case .TabsTrayState:
+                location = .TabsTray
+            case .HomePanelState(_):
+                location = .HomePanel
+            }
+
+            let validMenuItemsForLocation = self.allMenuItems.filter { $0.displayLocations.contains(self.location) }
+            self.menuItems = validMenuItemsForLocation.flatMap { menuItem in
+                return menuItem.states.filter { $0.isVisible(state) }
+            }
+            guard let menuView = menuView else { return }
+            menuView.setNeedsReload()
+            menuView.setNeedsLayout()
+        }
+    }
+
+    var actionDelegate: ActionDelegate?
+
+    private var location: DisplayLocation = .Browser
 
     private var menuView: MenuView!
 
     private var menuToolbarItems: [MenuToolbarItem]!
 
+    private var allMenuItems: [MenuItem]!
     private var menuItems: [MenuItemState]!
 
-    func setMenuItems(items: [MenuItem], toolbarItems: [MenuToolbarItem], forLocation location: DisplayLocation, url: NSURL? = nil) {
-        self.menuLocation = location
+    func setMenuItems(items: [MenuItem], toolbarItems: [MenuToolbarItem], forState state: AppState) {
         self.menuToolbarItems = toolbarItems.filter { $0.enabled }
-        let validMenuItemsForLocation = items.filter { $0.displayLocations.contains(location) }
-        self.menuItems = validMenuItemsForLocation.flatMap { menuItem in
-            return menuItem.states.filter { $0.isVisible(url) }
-        }
+        self.allMenuItems = items
+        self.state = state
     }
 
     override func viewDidLoad() {
@@ -54,26 +75,7 @@ class MenuViewController: UIViewController {
     }
 
     func performAction(action: Action) {
-        switch action {
-        case is TabAction:
-            (action as! TabAction).performActionWithTabManager(TabManager())
-            break
-        case is BookmarkAction:
-            (action as! BookmarkAction).performActionWithProfile(Profile())
-            break
-        case is BrowserAction:
-            (action as! BrowserAction).performActionWithBrowserViewController(BrowserViewController())
-            break
-        case is HomePanelAction:
-            (action as! HomePanelAction).performActionWithBrowserViewController(BrowserViewController())
-            break
-        case is SettingsAction:
-            (action as! SettingsAction).performActionWithRootViewController(self)
-            break
-        default:
-            print("Unexpected action type")
-            break
-        }
+        actionDelegate?.performAction(action, withState: state)
     }
 
 }

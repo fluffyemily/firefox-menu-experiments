@@ -11,3 +11,7 @@ import Foundation
 protocol Action {
     init()
 }
+
+protocol ActionDelegate {
+    func performAction(action: Action, withState state: AppState?)
+}

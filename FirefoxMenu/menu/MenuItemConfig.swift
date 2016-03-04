@@ -9,17 +9,6 @@
 import Foundation
 import UIKit
 
-enum DisplayLocation {
-    case Browser
-    case TabsTray
-    case HomePanel
-}
-
-//static let MenuItemWidth = 90
-//static let MenuItemHeight = 90
-//static let MenuItemIconHeight = 18
-//static let MenuItemIconWidth = 18
-
 struct MenuItem {
     let displayLocations: [DisplayLocation]
     let states: [MenuItemState]
@@ -42,7 +31,7 @@ struct MenuItemState {
     let action: Action.Type
 
     // variable that can hold a function that will determine whether or not the
-    var isVisible: (NSURL?) -> Bool
+    var isVisible: (AppState) -> Bool
 
     private let iconName: String
     private let selectedIconName: String
@@ -62,7 +51,7 @@ struct MenuItemState {
         self.enabled = enabled
         self.iconName = icon
         self.selectedIconName = selectedIcon
-        self.isVisible = { (url: NSURL?) -> Bool in
+        self.isVisible = { (state: AppState) -> Bool in
             return enabled
         }
     }

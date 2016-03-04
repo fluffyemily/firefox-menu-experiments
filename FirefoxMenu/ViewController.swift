@@ -8,6 +8,12 @@
 
 import UIKit
 
+enum AppState {
+    case BrowserState(url: NSURL, isBookmarked: Bool, isDesktopSite: Bool)
+    case TabsTrayState
+    case HomePanelState(homePanelIndex: Int)
+}
+
 class ViewController: UIViewController {
 
     override func viewDidLoad() {
@@ -22,8 +28,34 @@ class ViewController: UIViewController {
 
     override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject?) {
         if let menuVC = segue.destinationViewController as? MenuViewController {
-            menuVC.setMenuItems(MenuConfiguration.menuItems, toolbarItems: MenuConfiguration.menuToolbarItems, forLocation: .TabsTray)
-            
+            menuVC.setMenuItems(MenuConfiguration.menuItems, toolbarItems: MenuConfiguration.menuToolbarItems, forState: .TabsTrayState)
+            menuVC.actionDelegate = self
+        }
+    }
+}
+
+extension ViewController: ActionDelegate {
+
+    func performAction(action: Action, withState state: AppState?) {
+        switch action {
+        case is TabAction:
+            (action as! TabAction).performActionWithTabManager(TabManager())
+            break
+        case is BookmarkAction:
+            (action as! BookmarkAction).performActionWithProfile(Profile())
+            break
+        case is BrowserAction:
+            (action as! BrowserAction).performActionWithBrowserViewController(BrowserViewController())
+            break
+        case is HomePanelAction:
+            (action as! HomePanelAction).performActionWithBrowserViewController(BrowserViewController())
+            break
+        case is SettingsAction:
+            (action as! SettingsAction).performActionWithRootViewController(self)
+            break
+        default:
+            print("Unexpected action type")
+            break
         }
     }
 }

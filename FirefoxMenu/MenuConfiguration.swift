@@ -39,3 +39,9 @@ struct MenuConfiguration {
     static let MenuPaddingBetweenItems: CGFloat = 5.0
 
 }
+
+enum DisplayLocation {
+    case Browser
+    case TabsTray
+    case HomePanel
+}
