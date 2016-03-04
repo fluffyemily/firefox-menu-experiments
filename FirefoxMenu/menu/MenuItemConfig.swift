@@ -29,6 +29,7 @@ struct MenuItemState {
     let title: String
     let enabled: Bool
     let action: Action.Type
+    let longPressAction: Action.Type?
 
     // variable that can hold a function that will determine whether or not the
     var isVisible: (AppState) -> Bool
@@ -44,8 +45,9 @@ struct MenuItemState {
         return UIImage(named: selectedIconName)
     }
 
-    init(name: String, title: String, enabled: Bool, icon: String, selectedIcon: String, action: Action.Type) {
+    init(name: String, title: String, enabled: Bool, icon: String, selectedIcon: String, action: Action.Type, longPressAction: Action.Type? = nil) {
         self.action = action
+        self.longPressAction = longPressAction
         self.name = name
         self.title = title
         self.enabled = enabled

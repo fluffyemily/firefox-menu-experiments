@@ -119,7 +119,21 @@ extension MenuViewController: MenuItemDataSource {
             menuItemView.setHighlightedImage(selectedIcon)
         }
 
+        if let _ = menuItem.longPressAction {
+            let longPressRecognizer = UILongPressGestureRecognizer(target: self, action: "didReceiveLongPress:")
+            menuItemView.addGestureRecognizer(longPressRecognizer)
+        }
+
         return menuItemView
+    }
+
+    @objc private func didReceiveLongPress(recognizer: UILongPressGestureRecognizer) {
+        guard recognizer.state == .Ended,
+            let itemView = recognizer.view as? MenuItemView,
+            let menuItemIndex = menuView.indexPathForView(itemView),
+            let longPressAction = menuItems[menuItemIndex.getMenuItemIndex()].longPressAction else { return }
+
+        performAction(longPressAction.init())
     }
 }
 

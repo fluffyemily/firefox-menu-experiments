@@ -40,11 +40,11 @@ struct MenuConfiguration {
 
 
     private static var NewTabMenuItem: MenuItem {
-        return MenuItem(displayLocations: [.Browser, .TabsTray, .HomePanel], states: [MenuItemState(name: "NewTab", title: "New Tab", enabled: true, icon: "add", selectedIcon: "add", action: NewTabAction.self)])
+        return MenuItem(displayLocations: [.Browser, .TabsTray, .HomePanel], states: [MenuItemState(name: "NewTab", title: "New Tab", enabled: true, icon: "add", selectedIcon: "add", action: NewTabAction.self, longPressAction: OpenTabsTrayAction.self)])
     }
 
     private static var NewPrivateTabMenuItem: MenuItem {
-        return MenuItem(displayLocations: [.Browser, .TabsTray, .HomePanel], states: [MenuItemState(name: "NewPrivateTab", title: "New Private Tab", enabled: true, icon: "smallPrivateMask", selectedIcon: "smallPrivateMask", action: NewPrivateTabAction.self)])
+        return MenuItem(displayLocations: [.Browser, .TabsTray, .HomePanel], states: [MenuItemState(name: "NewPrivateTab", title: "New Private Tab", enabled: true, icon: "smallPrivateMask", selectedIcon: "smallPrivateMask", action: NewPrivateTabAction.self, longPressAction: OpenTabsTrayAction.self)])
     }
 
     private static var BookmarkMenuItem: MenuItem {

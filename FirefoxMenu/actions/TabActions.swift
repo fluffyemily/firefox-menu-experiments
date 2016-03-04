@@ -30,3 +30,10 @@ struct NewPrivateTabAction: TabAction {
         tabManager.addNewTab(isPrivate: true)
     }
 }
+
+struct OpenTabsTrayAction: TabAction {
+    init() {}
+    func performActionWithTabManager(tabManager: TabManager) {
+        print("Action: Opening Tabs Tray")
+    }
+}

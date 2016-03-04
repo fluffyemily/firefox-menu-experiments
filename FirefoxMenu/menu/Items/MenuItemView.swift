@@ -48,6 +48,13 @@ public class MenuItemView: UIControl {
     func prepareForReuse() {
         imageView.image = nil
         titleLabel.text = nil
+
+        guard let recognisers = gestureRecognizers else { return }
+        for recogniser in recognisers {
+            if recogniser is UILongPressGestureRecognizer {
+                self.removeGestureRecognizer(recogniser)
+            }
+        }
     }
 
     public func setTitle(title: String) {

@@ -258,11 +258,15 @@ class MenuView: UIView {
         guard let selectedButtonIndex = toolbarItems.indexOf(sender) else { return }
         toolbarDelegate?.menuView(self, didSelectItemAtIndex: selectedButtonIndex)
     }
+
+    func indexPathForView(itemView: MenuItemView) -> NSIndexPath? {
+        return (cachedItems as NSDictionary).allKeysForObject(itemView).first as? NSIndexPath
+    }
 }
 
 extension  MenuView: MenuItemViewControllerDelegate {
     func menuItemViewController(menuItemViewController: MenuItemViewController, didSelectMenuItem menuItem: MenuItemView) {
-        guard let indexOfSelectedView = (cachedItems as NSDictionary).allKeysForObject(menuItem).first as? NSIndexPath else { return }
+        guard let indexOfSelectedView = indexPathForView(menuItem) else { return }
         menuItemDelegate?.menuView(self, didSelectItemAtIndexPath: indexOfSelectedView)
     }
 }
